@@ -1,21 +1,20 @@
-import contactsService from "../services/contactsServices.js";
+// import contactsService from "../services/contactsServices.js";
 import HttpError from "../helpers/HttpError.js";
 import ctrlWrapper from "../helpers/ctrlWrapper.js";
 import validateBody from "../helpers/validateBody.js";
 import schemas from "../schemas/contactsSchemas.js";
+import Contact from "../models/contact.js";
 
-const { listContacts, getContactById, removeContact, addContact, editContact } =
-  contactsService;
 const { createContactSchema, updateContactSchema } = schemas;
 
 const getAllContacts = async (req, res) => {
-  const contacts = await listContacts();
+  const contacts = await Contact.find();
   res.json(contacts);
 };
 
 const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const contactOne = await getContactById(id);
+  const contactOne = await Contact.findById(id);
   if (!contactOne) {
     throw HttpError(404);
   }
@@ -24,7 +23,7 @@ const getOneContact = async (req, res) => {
 
 const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const removedContact = await removeContact(id);
+  const removedContact = await Contact.findByIdAndDelete(id);
   if (!removedContact) {
     throw HttpError(404);
   }
@@ -35,7 +34,7 @@ const createContact = async (req, res) => {
   // validateBody(createContactSchema);
   const { name, email, phone } = req.body;
   createContactSchema.validateAsync({ name, email, phone });
-  const newContact = await addContact({ name, email, phone });
+  const newContact = await Contact.create({ name, email, phone });
 
   res.status(201).json(newContact);
 };
@@ -47,7 +46,7 @@ const updateContact = async (req, res) => {
   if (!Object.keys(body).length) {
     throw HttpError(400, "Body must have at least one field");
   }
-  const result = await editContact({ id, ...body });
+  const result = await Contact.findByIdAndUpdate({ id, ...body });
   if (!result) {
     throw HttpError(404);
   }
