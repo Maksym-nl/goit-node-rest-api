@@ -29,7 +29,7 @@ const deleteContact = async (req, res) => {
 
 const createContact = async (req, res) => {
   const { name, email, phone } = req.body;
-  createContactSchema.validateAsync({ name, email, phone });
+
   const newContact = await Contact.create({ name, email, phone });
 
   res.status(201).json(newContact);
