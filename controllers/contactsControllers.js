@@ -4,7 +4,7 @@ import ctrlWrapper from "../helpers/ctrlWrapper.js";
 import validateBody from "../helpers/validateBody.js";
 import schemas from "../schemas/contactsSchemas.js";
 
-const { listContacts, getContactById, removeContact, addContact } =
+const { listContacts, getContactById, removeContact, addContact, editContact } =
   contactsService;
 const { createContactSchema, updateContactSchema } = schemas;
 
@@ -14,6 +14,7 @@ const getAllContacts = async (req, res) => {
 };
 
 const getOneContact = async (req, res) => {
+  const { id } = req.params;
   const contactOne = await getContactById(id);
   if (!contactOne) {
     return HttpError(404);
@@ -22,14 +23,16 @@ const getOneContact = async (req, res) => {
 };
 
 const deleteContact = async (req, res) => {
+  const { id } = req.params;
   const removedContact = await removeContact(id);
   if (!removedContact) {
-    return HttpError(404);
+    throw HttpError(404);
   }
-  res.json(removeContact);
+  res.json(removedContact);
 };
 
 const createContact = async (req, res) => {
+  // validateBody(createContactSchema);
   const { name, email, phone } = req.body;
   createContactSchema.validateAsync({ name, email, phone });
   const newContact = await addContact({ name, email, phone });
@@ -37,7 +40,19 @@ const createContact = async (req, res) => {
   res.status(201).json(newContact);
 };
 
-const updateContact = (req, res) => {};
+const updateContact = async (req, res) => {
+  validateBody(updateContactSchema);
+  const { id } = req.params;
+  const { body } = req;
+  if (!Object.keys(body).length) {
+    throw HttpError(400, "Body must have at least one field");
+  }
+  const result = await editContact({ id, ...body });
+  if (!result) {
+    return HttpError(404);
+  }
+  res.json(result);
+};
 
 const data = {
   getAllContacts: ctrlWrapper(getAllContacts),

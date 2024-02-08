@@ -6,7 +6,11 @@ const createContactSchema = Joi.object({
   email: Joi.string().required(),
 });
 
-const updateContactSchema = Joi.object({});
+const updateContactSchema = Joi.object({
+  name: Joi.string(),
+  phone: Joi.string(),
+  email: Joi.string(),
+});
 
 const data = { createContactSchema, updateContactSchema };
 export default data;
