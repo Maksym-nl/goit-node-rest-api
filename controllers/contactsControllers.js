@@ -17,7 +17,7 @@ const getOneContact = async (req, res) => {
   const { id } = req.params;
   const contactOne = await getContactById(id);
   if (!contactOne) {
-    return HttpError(404);
+    throw HttpError(404);
   }
   res.json(contactOne);
 };
@@ -49,7 +49,7 @@ const updateContact = async (req, res) => {
   }
   const result = await editContact({ id, ...body });
   if (!result) {
-    return HttpError(404);
+    throw HttpError(404);
   }
   res.json(result);
 };
