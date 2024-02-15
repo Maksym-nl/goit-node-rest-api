@@ -5,13 +5,15 @@ import ctrlWrapper from "../helpers/ctrlWrapper.js";
 import Contact from "../models/contact.js";
 
 const getAllContacts = async (req, res) => {
-  const contacts = await Contact.find();
+  const { _id: owner } = req.user;
+  const contacts = await Contact.find({ owner });
   res.json(contacts);
 };
 
 const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const contactOne = await Contact.findById(id);
+  const { _id: owner } = req.user;
+  const contactOne = await Contact.findOne({ owner, _id: id });
   if (!contactOne) {
     throw HttpError(404);
   }
@@ -20,7 +22,8 @@ const getOneContact = async (req, res) => {
 
 const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const removedContact = await Contact.findByIdAndDelete(id);
+  const { _id: owner } = req.user;
+  const removedContact = await Contact.findOneAndDelete({ owner, _id: id });
   if (!removedContact) {
     throw HttpError(404);
   }
@@ -28,20 +31,24 @@ const deleteContact = async (req, res) => {
 };
 
 const createContact = async (req, res) => {
+  const { _id: owner } = req.user;
   const { name, email, phone } = req.body;
 
-  const newContact = await Contact.create({ name, email, phone });
+  const newContact = await Contact.create({ name, email, phone, owner });
 
   res.status(201).json(newContact);
 };
 
 const updateContact = async (req, res) => {
+  const { _id: owner } = req.user;
   const { id } = req.params;
   const { body } = req;
   if (!Object.keys(body).length) {
     throw HttpError(400, "Body must have at least one field");
   }
-  const result = await Contact.findByIdAndUpdate(id, body, { new: true });
+  const result = await Contact.findOneAndUpdate({ _id: id, owner }, body, {
+    new: true,
+  });
   if (!result) {
     throw HttpError(404);
   }
@@ -49,10 +56,13 @@ const updateContact = async (req, res) => {
 };
 
 const updateFavoriteContact = async (req, res) => {
+  const { _id: owner } = req.user;
   const { id } = req.params;
   const { body } = req;
 
-  const result = await Contact.findByIdAndUpdate(id, body, { new: true });
+  const result = await Contact.findOneAndUpdate({ _id: id, owner }, body, {
+    new: true,
+  });
   if (!result) {
     throw HttpError(404);
   }
