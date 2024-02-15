@@ -1,7 +1,7 @@
 import express from "express";
-import controller from "../controllers/usersControllers";
-import validateBody from "../helpers/validateBody";
-import userSchema from "../schemas/userSchemas";
+import controller from "../controllers/usersControllers.js";
+import validateBody from "../helpers/validateBody.js";
+import userSchema from "../schemas/userSchemas.js";
 const router = express.Router();
 
 router.post(
@@ -10,4 +10,5 @@ router.post(
   controller.registration
 );
 
+router.post("/login", validateBody(userSchema.userSchema), controller.login);
 export default router;
