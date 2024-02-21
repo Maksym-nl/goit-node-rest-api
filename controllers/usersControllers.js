@@ -1,5 +1,10 @@
+import gravatar from "gravatar";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import path from "path";
+import Jimp from "jimp";
+import fs from "fs/promises";
+
 import HttpError from "../helpers/HttpError.js";
 import ctrlWrapper from "../helpers/ctrlWrapper.js";
 import config from "../config.js";
@@ -16,13 +21,33 @@ const registration = async (req, res) => {
   }
 
   const hashPassword = await bcryptjs.hash(password, 10);
-  const newUser = await User.create({ email, password: hashPassword });
+  const avatarUrl = gravatar.url(email);
+  const newUser = await User.create({
+    email,
+    password: hashPassword,
+    avatarUrl,
+  });
   res.status(201).json({
     user: {
       email,
       subscription: newUser.subscription,
+      avatarUrl,
     },
   });
+};
+
+const updateAvatar = async (req, resp, next) => {
+  const { _id, email } = req.user;
+  const avatarDir = path.resolve("public", "avatars");
+  const { path: tmpUploed, originalname } = req.file;
+  const fileName = `${originalname}-${email}`;
+  const resultUpload = path.join(avatarDir, fileName);
+  const formatetAvatar = await Jimp.read(tmpUploed);
+  formatetAvatar.resize(250, 250).quality(70).write(resultUpload);
+  fs.rename(tmpUploed, resultUpload);
+  const avatarURL = path.join("avatars", fileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+  resp.json({ avatarURL });
 };
 const logout = async (req, res) => {
   const { _id } = req.user;
@@ -67,5 +92,6 @@ const data = {
   login: ctrlWrapper(login),
   logout: ctrlWrapper(logout),
   current: ctrlWrapper(current),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
 export default data;
