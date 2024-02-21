@@ -22,4 +22,5 @@ router.patch(
   upload.single("avatar"),
   controller.updateAvatar
 );
+router.patch("/", authenticate, controller.updeteSubscription);
 export default router;

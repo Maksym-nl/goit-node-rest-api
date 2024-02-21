@@ -9,6 +9,7 @@ import HttpError from "../helpers/HttpError.js";
 import ctrlWrapper from "../helpers/ctrlWrapper.js";
 import config from "../config.js";
 import User from "../models/users.js";
+import { response } from "express";
 
 const { SECRET_KEY } = config;
 
@@ -34,6 +35,20 @@ const registration = async (req, res) => {
       avatarUrl,
     },
   });
+};
+const updeteSubscription = async (req, resp) => {
+  const { _id } = req.user;
+  const { subscription } = req.body;
+  const typsSubscription = ["starter", "pro", "business"];
+  if (!typsSubscription.includes(subscription)) {
+    throw HttpError(400, "Invalidate subscription ");
+  }
+  const result = await User.findByIdAndUpdate(
+    _id,
+    { subscription },
+    { new: true }
+  );
+  resp.json(result);
 };
 
 const updateAvatar = async (req, resp, next) => {
@@ -93,5 +108,6 @@ const data = {
   logout: ctrlWrapper(logout),
   current: ctrlWrapper(current),
   updateAvatar: ctrlWrapper(updateAvatar),
+  updeteSubscription: ctrlWrapper(updeteSubscription),
 };
 export default data;
