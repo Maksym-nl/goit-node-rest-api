@@ -129,7 +129,7 @@ const resendEmail = async (req, resp) => {
   }
   const { verify, verificationToken } = user;
   if (verify) {
-    throw (400, "Verification has already been passed");
+    throw HttpError(400, "Verification has already been passed");
   }
   await sendMail({
     to: email,
