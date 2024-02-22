@@ -23,4 +23,10 @@ router.patch(
   controller.updateAvatar
 );
 router.patch("/", authenticate, controller.updeteSubscription);
+router.get("/verify/:verificationToken", controller.verifyEmail);
+router.post(
+  "/verify",
+  validateBody(userSchema.emailSchema),
+  controller.resendEmail
+);
 export default router;
